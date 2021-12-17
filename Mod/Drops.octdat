@@ -1,0 +1,57 @@
+// drop manager settings
+{
+    id DropMod.Drops.Manager
+    type DropMod.DropManager
+    
+    attemptsPerDay = 2
+    dropLimit = 3
+    dropDecayDays = 3
+}
+
+// dropped supplies
+{
+    id DropMod.Drops.Supplies
+    type DropMod.DropType
+    name = Abandoned Supplies
+    prefab = 
+    {
+        type Prefab
+        path = /DroppedSupplies.fbx
+        behavior = DropMod.DropBehavior
+        name = Dropped Supplies
+        
+        // utilize the shared materials that we use on props
+        sharedMaterials = 
+        [
+            {
+                type OctDatSharedMaterial
+                names = 
+                [
+                    Cloth
+                    DarkCloth
+                ]
+                material = <Oct.Props.Materials.Cloth>
+            }
+        ]
+    }
+}
+
+// expose the command to the command system
+{
+    id DropMod.Commands.Types.LootDrop
+    type CommandType
+    
+    name = Loot Drop
+    commandClass = DropMod.OpenDropCommand
+    icon = <Oct.Commands.Icons.Hauling>
+}
+
+// expand the existing hauling job to include this
+{
+    id Oct.Commands.Jobs.Hauling
+    type Job
+    commands = 
+    [
+        <DropMod.Commands.Types.LootDrop>
+    ]
+}
