@@ -33,8 +33,8 @@ namespace DropMod
             // play the animation (it'll auto transition back to idle when the verb is finished)
             executor.character.animations.PlayAnimation("Armature|Pick");
 
-            // take 10 times as long as a normal incremental action
-            breakAfter = RollRate("Hauling", 10);
+            // take 4 times as long as a normal incremental action
+            breakAfter = RollRate("Hauling", 4);
         }
 
         public override void Tick(float dt)
@@ -60,7 +60,7 @@ namespace DropMod
                 if (executor.character.SuccessRoll("Hauling"))
                 {
                     // success xp! (*10 because 10x as slow as normal actions)
-                    executor.character.AwardExperience(Character.AttributeSuccessXP * 10, "Hauling");
+                    executor.character.AwardExperience(Character.AttributeSuccessXP * 4, "Hauling");
 
                     // break it
                     target.BreakOpen();
@@ -77,10 +77,10 @@ namespace DropMod
                 else
                 {
                     // failed, learn from our failure
-                    executor.character.AwardExperience(Character.AttributeFailureXP * 10, "Hauling");
+                    executor.character.AwardExperience(Character.AttributeFailureXP * 4, "Hauling");
 
                     // roll next attempt and update our anims peed
-                    breakAfter = RollRate("Hauling", 10);
+                    breakAfter = RollRate("Hauling", 4);
                 }
             }
         }

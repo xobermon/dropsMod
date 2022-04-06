@@ -24,6 +24,8 @@ namespace DropMod
             }
         }
 
+        public Notification notification { get; private set; }
+
         public DropType type { get; private set; }
 
         public TimeStamp droppedAt { get; private set; }
@@ -50,6 +52,7 @@ namespace DropMod
 
             droppedAt = TimeManager.Instance.seconds;
 
+            // register it
             DropManager.Instance.AddDrop(this);
         }
 
@@ -58,13 +61,23 @@ namespace DropMod
 
         protected override void Destroyed()
         {
+            // deregister us
             DropManager.Instance.RemoveDrop(this);
 
+            // kill our notification
+            if (notification != null)
+            {
+                notification.Destroy();
+                notification = null;
+            }
+
+            // kill the loot command 
             if (lootCommand != null)
             {
                 lootCommand.Cancel();
             }
 
+            // handle our stuff before we call up the chain
             base.Destroyed();
         }
 
@@ -181,6 +194,42 @@ namespace DropMod
         {
             base.Tick(dt);
 
+            // discovered?
+            if (notification == null)
+            {
+                // any players close to us?
+                if (FactionManager.Instance.playerFaction is Faction playerFaction)
+                {
+                    foreach (var member in playerFaction.characters)
+                    {
+                        // only mortals
+                        if (member.type.genus != CharacterType.Genus.Humanoid)
+                        {
+                            continue;
+                        }
+
+                        Vector3 diff = member.pos - pos;
+                        // close enough
+                        if (diff.magnitude < 5f)
+                        {
+                            // can they see it?
+                            if (member.perception.GetLineOfSight(this))
+                            {
+                                // how long until it decays
+                                TimeStamp fades = droppedAt + TimeManager.SecondsPerDay * DropManager.Instance.dropDecayDays;
+
+                                // show it
+                                float remaining = (float)(fades - TimeManager.Instance.seconds);
+
+                                // discover it
+                                notification = new Notification("Dropped Supplies discovered!", this, remaining);
+                            }
+                        }
+                    }
+                }
+            }
+            
+
             // time to decay?
             if (TimeManager.Instance.seconds > droppedAt + TimeManager.SecondsPerDay * DropManager.Instance.dropDecayDays)
             {
@@ -197,6 +246,9 @@ namespace DropMod
         public override void VisitProperties(IActorPropertyVisitor visitor)
         {
             base.VisitProperties(visitor);
+
+            // how long until it decays!
+            visitor.VisitSingleTextProperty("Decays", TimeManager.Instance.TimeUntil(droppedAt + TimeManager.SecondsPerDay * DropManager.Instance.dropDecayDays));
 
             // show the Loot command button and icon button and hotkey!
             visitor.VisitSharedCommandProperty("Loot", GetOrIssueLootCommand, lootCommand, true, CommandManager.Instance.GetCommandType("Loot Drop"), 0, true, "Primary");

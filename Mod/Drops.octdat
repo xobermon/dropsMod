@@ -41,7 +41,7 @@
     id DropMod.Commands.Types.LootDrop
     type CommandType
     
-    name = Loot Drop
+    name = Loot Supplies
     commandClass = DropMod.OpenDropCommand
     icon = <Oct.Commands.Icons.Hauling>
 }

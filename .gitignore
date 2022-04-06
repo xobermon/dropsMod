@@ -79,3 +79,6 @@ $RECYCLE.BIN/
 # audition files
 *.pkf
 *.pkf.meta
+/Src/DropMod/bin
+/Src/DropMod/obj/Release
+/Src/DropMod/obj/Debug
