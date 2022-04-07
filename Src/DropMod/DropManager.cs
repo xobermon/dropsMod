@@ -124,8 +124,26 @@ namespace DropMod
                         // don't spawn in range of the base
                         if (!ZoneManager.Instance.IsAtHome(tile))
                         {
-                            // spawn the drop (this will call add on us above and refresh its behavior)
-                            new DropActor(types[Random.Range(0, types.Count)], tile);
+                            // pick a type
+                            DropType type = null;
+                            float totalWeight = 0f;
+                            foreach (var potType in types)
+                            {
+                                if (potType.weight > 0f)
+                                {
+                                    totalWeight += potType.weight;
+                                    if (Random.value * totalWeight <= potType.weight)
+                                    {
+                                        type = potType;
+                                    }
+                                }
+                            }
+
+                            if (type != null)
+                            {
+                                // spawn the drop (this will call add on us above and refresh its behavior)
+                                new DropActor(type, tile);
+                            }
                         }
                     }
                 }

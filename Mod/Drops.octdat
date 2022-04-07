@@ -20,6 +20,16 @@
         behavior = DropMod.DropBehavior
         name = Dropped Supplies
         
+        filter = 
+        {
+            id DropMod.Drops.CustomFilter
+            included = 
+            [
+                <Oct.Items.Categories.Food>
+                <Oct.Items.Weapons.Axe.Steel>
+            ]
+        }
+        
         // utilize the shared materials that we use on props
         sharedMaterials = 
         [

@@ -222,7 +222,7 @@ namespace DropMod
                                 float remaining = (float)(fades - TimeManager.Instance.seconds);
 
                                 // discover it
-                                notification = new Notification("Dropped Supplies discovered!", this, remaining);
+                                notification = new Notification(type.name + " discovered!", this, remaining);
                             }
                         }
                     }

@@ -8,6 +8,7 @@ namespace DropMod
         public string name;
         public DropBehavior prefab;
         public IItemFilter filter;
+        public float weight = 1f;
 
         public DropType(OctDatGlobalInitializer initializer) : base(initializer)
         {
