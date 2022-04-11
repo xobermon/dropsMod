@@ -107,7 +107,7 @@ namespace DropMod
             }
 
             // time to drop?
-            if (TimeManager.Instance.seconds > nextDrop)
+            if (TimeManager.Instance.seconds >= nextDrop)
             {
                 // space for a new drop?
                 if (drops.Count < dropLimit)
@@ -143,13 +143,18 @@ namespace DropMod
                             {
                                 // spawn the drop (this will call add on us above and refresh its behavior)
                                 new DropActor(type, tile);
+
+                                // found one!
+                                nextDrop = TimeManager.Instance.seconds + TimeManager.SecondsPerDay / (attemptsPerDay * OctoberMath.DistributedRandom(.5f, 2f));
                             }
                         }
                     }
                 }
-
-                // next drop!
-                nextDrop = TimeManager.Instance.seconds + TimeManager.SecondsPerDay / (attemptsPerDay * OctoberMath.DistributedRandom(.5f, 2f));
+                else
+                {
+                    // try again later
+                    nextDrop = TimeManager.Instance.seconds + TimeManager.SecondsPerDay / (attemptsPerDay * OctoberMath.DistributedRandom(.5f, 2f));
+                }
             }
 
             // tick drops, in reverse order in case one times out and destroys (and removes itself)
