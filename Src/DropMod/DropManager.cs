@@ -66,6 +66,43 @@ namespace DropMod
             RefreshVisible();
         }
 
+        // closemap is called when we're done playing in a map
+        public override void CloseMap()
+        {
+            for (int i = drops.Count - 1; i >= 0; i = Mathf.Min(i, drops.Count) - 1)
+            {
+                if (drops[i].behavior != null)
+                {
+                    GameObject.Destroy(drops[i].dropBeh);
+                    drops[i].SetBehavior(null);
+                }
+            }
+
+            base.CloseMap();
+        }
+
+        // openmap is called when a map becomes the current playing area
+        public override void OpenMap()
+        {
+            base.OpenMap();
+
+            RefreshVisible();
+        }
+
+        // destroymap is called when we're done with a map and it can be destroyed
+        public override void DestroyMap(MapId map)
+        {
+            for (int i = drops.Count - 1; i >= 0; i = Mathf.Min(i, drops.Count) - 1)
+            {
+                if (drops[i].OnMap(map))
+                {
+                    drops[i].Destroy();
+                }
+            }
+
+            base.DestroyMap(map);
+        }
+
         // resetgame is called whenever we go from a saved game to another or to a new game
         public override void ResetGame()
         {
@@ -106,6 +143,18 @@ namespace DropMod
                 return;
             }
 
+            // don't run when we aren't on a map
+            if (MapManager.Instance.map == MapId.None)
+            {
+                return;
+            }
+
+            // don't run when there isn't a local map
+            if (!TerrainManager.Instance.HasMap())
+            {
+                return;
+            }
+
             // time to drop?
             if (TimeManager.Instance.seconds >= nextDrop)
             {
@@ -113,7 +162,7 @@ namespace DropMod
                 if (drops.Count < dropLimit)
                 {
                     // generate a random tile position
-                    TilePos tile = (new TilePos(UnityEngine.Random.Range(-TerrainManager.Radius + 1, TerrainManager.Radius), 0, UnityEngine.Random.Range(-TerrainManager.Radius + 1, TerrainManager.Radius))).Clamped();
+                    TilePos tile = (new TilePos(UnityEngine.Random.Range(-TerrainManager.Instance.mapRadius + 1, TerrainManager.Instance.mapRadius), 0, UnityEngine.Random.Range(-TerrainManager.Instance.mapRadius + 1, TerrainManager.Instance.mapRadius))).Clamped();
 
                     // sample the topmost world position
                     tile.y = TerrainManager.Instance.GetHeight(tile.x, tile.z);
@@ -122,7 +171,7 @@ namespace DropMod
                     if (PathingManager.Instance.CloseNavSpot(null, tile, ref tile, BlockingQuery.Pathing, false))
                     {
                         // don't spawn in range of the base
-                        if (!ZoneManager.Instance.IsAtHome(tile))
+                        if (!ZoneManager.Instance.IsHome(tile))
                         {
                             // pick a type
                             DropType type = null;
@@ -178,6 +227,16 @@ namespace DropMod
         // update the behavior (unity representaiton) of a drop
         public void RefreshBehavior(DropActor drop)
         {
+            if (!drop.onCurrentMap)
+            {
+                if (drop.dropBeh != null)
+                {
+                    GameObject.Destroy(drop.dropBeh);
+                    drop.SetBehavior(null);
+                }
+                return;
+            }
+
             DropBehavior dropBeh = drop.dropBeh;
             if (dropBeh == null)
             {
@@ -197,14 +256,14 @@ namespace DropMod
                 // above or below the cut line?
                 if (PropManager.Instance.LayerHidden(drop.tilePos))
                 {
-                    if (dropBeh.layerVisible)
+                    if (dropBeh.visible)
                     {
-                        dropBeh.LayerHidden();
+                        dropBeh.Hide();
                     }
                 }
-                else if (!dropBeh.layerVisible)
+                else if (!dropBeh.visible)
                 {
-                    dropBeh.LayerShown();
+                    dropBeh.Show();
                 }
             }
         }

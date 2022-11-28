@@ -31,6 +31,33 @@ namespace DropMod
             }
         }
 
+        // return our target
+        public override Actor Target()
+        {
+            return target;
+        }
+
+        public override bool Valid()
+        {
+            if (!base.Valid())
+            {
+                return false;
+            }
+
+            // invalid if we don't have a target
+            if (target == null)
+            {
+                return false;
+            }
+            // invalid if our target has been destroyed
+            else if (target.destroyed)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public override bool CanExecute(CommandCharacterFacet forExecutor, OctScriptContext castingContext = null, Command parent = null, bool micro = false)
         {
             if (!base.CanExecute(forExecutor, castingContext, parent, micro))
@@ -39,7 +66,7 @@ namespace DropMod
             }
 
             // must be reachable to be able to execute
-            if (!target.CanPathTo(forExecutor.actor))
+            if (!target.CanPathTo(forExecutor.actor, out UnityEngine.Vector3 interactPos))
             {
                 BlockedFor(forExecutor, COMMAND_BLOCKED_UNREACHABLE);
                 return false;

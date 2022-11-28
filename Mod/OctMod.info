@@ -1,3 +1,5 @@
 name=Abandoned Supplies
 preview=AbandonedSupplies.png
+description=Example mod that shows how to add new code systems, commands, and verbs. Drops spawn in the wild, crack them open for loot!
+compatibleVersions=v0.26;v0.27
 publishedFileId=2782901730
