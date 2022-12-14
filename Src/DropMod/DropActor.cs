@@ -209,7 +209,7 @@ namespace DropMod
                         }
 
                         // only people on the same map
-                        if (member.OnMap(map))
+                        if (!member.OnMap(map))
                         {
                             continue;
                         }
