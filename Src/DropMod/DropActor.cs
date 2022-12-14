@@ -208,6 +208,12 @@ namespace DropMod
                             continue;
                         }
 
+                        // only people on the same map
+                        if (member.OnMap(map))
+                        {
+                            continue;
+                        }
+
                         Vector3 diff = member.pos - pos;
                         // close enough
                         if (diff.magnitude < 5f)
