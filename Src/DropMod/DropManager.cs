@@ -168,7 +168,7 @@ namespace DropMod
                     tile.y = TerrainManager.Instance.GetHeight(tile.x, tile.z);
 
                     // find the closest nav position
-                    if (PathingManager.Instance.CloseNavSpot(null, tile, ref tile, BlockingQuery.Pathing, false))
+                    if (PathingManager.Instance.CloseNavSpot(null, tile, ref tile, BlockingQuery.Pathing, CloseNavSpotFlags.ReachableOnSurface))
                     {
                         // don't spawn in range of the base
                         if (!ZoneManager.Instance.IsHome(tile))

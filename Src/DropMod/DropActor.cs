@@ -85,106 +85,28 @@ namespace DropMod
         {
             // up to 50% of ruler's prestige, but exponential from 0
             float worth = Mathf.Max(KingdomManager.Instance.playerKingdom.ruler.GetPrestige() * Mathf.Pow(Random.value, 2f) * OctoberMath.DistributedRandom(0f, .5f), 5);
-            float balance = worth;
-            while (balance >= 1)
+
+            void DropContents(IItemType type, float value)
             {
-                IItemType chosenType = null;
-                float chosenValue = float.MaxValue;
-                float totalWeight = 0;
-                float value = Mathf.Min(balance, 1 + (worth * OctoberMath.DistributedRandom(0f, 1f, 1.5f) * Mathf.Pow(Random.value, 2)));
-                for (int i = ItemManager.Instance.types.Count - 1; i >= 0; --i)
-                {
-                    IItemType itemType = ItemManager.Instance.types[i];
-
-                    // can filter to specific items
-                    if (type.filter != null)
-                    {
-                        if (!type.filter.Includes(itemType))
-                        {
-                            continue;
-                        }
-                    }
-
-                    // instanced?
-                    if (itemType is InstancedItemType potInstType)
-                    {
-                        // don't drop if it's for an exclusive class
-                        if (potInstType.exclusive != null)
-                        {
-                            continue;
-                        }
-
-                        // has value?
-                        System.Nullable<InstancedItemStat> stat = potInstType.GetStat("Value");
-                        if (stat != null)
-                        {
-                            if (stat.Value.min <= value && stat.Value.max >= value)
-                            {
-                                float potValue = Mathf.Min(value, stat.Value.max);
-                                float weight = OctoberMath.DistributedRandom(.5f, 1.5f) * potInstType.carryChance;
-                                if (weight > 0)
-                                {
-                                    totalWeight += weight;
-                                    if (Random.value * totalWeight <= weight)
-                                    {
-                                        chosenType = itemType;
-                                        chosenValue = potValue;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    // stacked?
-                    else if (itemType is StackedItemType potStackType)
-                    {
-                        float perc = (value / potStackType.value);
-                        if (perc >= 0)
-                        {
-                            float weight = OctoberMath.DistributedRandom(.5f, 1.5f) * potStackType.carryChance;
-                            totalWeight += weight;
-                            if (Random.value * totalWeight <= weight)
-                            {
-                                chosenType = itemType;
-                                chosenValue = Mathf.Min(value, potStackType.value);
-                            }
-                        }
-                    }
-                }
-
-                // didn't find anything
-                if (chosenType == null)
-                {
-                    break;
-                }
-
-                // if it isn't concrete, resolve a concrete type in this world
-                if (!chosenType.IsConcrete())
-                {
-                    if (chosenType is ItemType chosenItemType)
-                    {
-                        chosenType = chosenItemType.ResolveType();
-                    }
-                }
-
-                if (chosenType.definition is InstancedItemType instType)
+                if (type.definition is InstancedItemType instType)
                 {
                     // turns the desired value back into quality and durability
-                    instType.ValueToQuality(chosenValue, out float quality, out float healthNorm);
-                    InstancedItem item = instType.NewItem(chosenType, new InstancedItemInitializer(quality, healthNorm, null));
+                    instType.ValueToQuality(value, out float quality, out float healthNorm);
+                    InstancedItem item = instType.NewItem(type, new InstancedItemInitializer(quality, healthNorm, null));
 
                     // drops an item from this position
                     ItemManager.Instance.DropItem(pos, item, Ignored.No, Log.Added, "looted");
                 }
-                else if (chosenType.definition is StackedItemType stackType)
+                else if (type.definition is StackedItemType stackType)
                 {
-                    int count = OctoberMath.FloorToInt((chosenValue / stackType.value) * stackType.stackLimit);
+                    int count = OctoberMath.FloorToInt(value / stackType.ValuePer());
                     if (count > 0)
                     {
-                        ItemManager.Instance.DropStack(pos, chosenType, count, 1, Ignored.No, Log.Added, "looted");
+                        ItemManager.Instance.DropStack(pos, type, count, 1, Ignored.No, Log.Added, "looted");
                     }
                 }
-                balance -= chosenValue;
             }
+            ItemManager.Instance.GenerateLoot(worth, DropContents, type.filter);
 
             // destroy ourselves when we're done
             Destroy();
