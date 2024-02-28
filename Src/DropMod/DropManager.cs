@@ -38,17 +38,6 @@ namespace DropMod
             drops.Remove(drop);
         }
 
-        // prefab instances - not saved, regenerated on load
-        public List<DropBehavior> dropBehs { get; private set; } = new List<DropBehavior>();
-        public void AddDropBehavior(DropBehavior dropBeh)
-        {
-            dropBehs.Add(dropBeh);
-        }
-        public void RemoveDropBehavior(DropBehavior dropBeh)
-        {
-            dropBehs.Remove(dropBeh);
-        }
-
         // time of next drop
         public TimeStamp nextDrop;
 
@@ -113,7 +102,6 @@ namespace DropMod
                 drops[i].Destroy();
             }
             OctoberUtils.Assert(drops.Count == 0);
-            OctoberUtils.Assert(dropBehs.Count == 0);
         }
 
         // Called when simulation portion of new game is complete
