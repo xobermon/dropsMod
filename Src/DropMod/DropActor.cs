@@ -176,7 +176,7 @@ namespace DropMod
             base.VisitProperties(visitor);
 
             // how long until it decays!
-            visitor.VisitSingleTextProperty("Decays", TimeManager.Instance.TimeUntil(droppedAt + TimeManager.SecondsPerDay * DropManager.Instance.dropDecayDays));
+            visitor.VisitSingleTextProperty("Decays", (string)TimeManager.Instance.TimeUntil(droppedAt + TimeManager.SecondsPerDay * DropManager.Instance.dropDecayDays));
 
             // show the Loot command button and icon button and hotkey!
             visitor.VisitSharedCommandProperty("Loot", GetOrIssueLootCommand, lootCommand, true, CommandManager.Instance.GetCommandType("Loot Drop"), 0, true, "Primary");
