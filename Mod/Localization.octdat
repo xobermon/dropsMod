@@ -1,0 +1,10 @@
+{
+    id Oct.Localization.Languages.Japanese
+    type LocalizationLanguage
+    appendonly
+    
+    files = 
+    [
+        \loc\jpn.loc
+    ]
+}
